@@ -86,7 +86,6 @@
 				} \
 				last = last-> NEXT ; \
 			} \
-			last-> NEXT = child; \
 		} \
 		child-> NEXT = NULL; \
 		child-> PARENT = NULL; \
