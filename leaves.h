@@ -20,6 +20,46 @@
 		last-> NEXT = next; \
 	}
 
+#define EXT_LL_REMOVE(SHORT, TYPE, NEXT) \
+	extern void SHORT ## _remove(TYPE *node, TYPE *remove)
+#define LL_REMOVE(SHORT, TYPE, NEXT) \
+	void SHORT ## _remove(TYPE *node, TYPE *remove) { \
+		TYPE *prev = node; \
+		TYPE *last = node-> NEXT; \
+		while (last) { \
+			if (last == remove) { \
+				prev-> NEXT = remove-> NEXT ; \
+				remove-> NEXT = NULL ; \
+				break; \
+			} \
+			prev = last; \
+			last = last-> NEXT ; \
+		} \
+	}
+
+#define EXT_LL_FREE(SHORT, TYPE) \
+	extern void SHORT ## _free(TYPE *node)
+#define LL_FREE(SHORT, TYPE, NEXT, CODE) \
+	void SHORT ## _free(TYPE *node) { \
+		TYPE *next; \
+		while (node) { \
+			next = node-> NEXT ; \
+			CODE ; \
+			free(node); \
+			node = next; \
+		} \
+	}
+
+#define EXT_LL_PACKAGE(SHORT, TYPE, NEXT) \
+	EXT_LL_ADD_NEXT(SHORT, TYPE, NEXT); \
+	EXT_LL_REMOVE(SHORT, TYPE, NEXT); \
+	EXT_LL_FREE(SHORT, TYPE);
+
+#define LL_PACKAGE(SHORT, TYPE, NEXT, ON_FREE) \
+	LL_ADD_NEXT(SHORT, TYPE, NEXT); \
+	LL_REMOVE(SHORT, TYPE, NEXT); \
+	LL_FREE(SHORT, TYPE, NEXT, ON_FREE);
+
 #define EXT_LLT_ADD_CHILD(SHORT, TYPE, CHILD, NEXT, PARENT) \
 	extern void SHORT ## _add_child(TYPE *root, TYPE *child)
 #define LLT_ADD_CHILD(SHORT, TYPE, CHILD, NEXT, PARENT) \
