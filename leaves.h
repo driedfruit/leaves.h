@@ -144,4 +144,94 @@
 	LLT_GET_CHILD(SHORT, TYPE, CHILD, NEXT) \
 	LLT_COUNT(SHORT, TYPE, CHILD, NEXT)
 
+#define EXT_DLLT_ADD_CHILD(SHORT, TYPE, CHILD, PREV, NEXT, PARENT) \
+	extern void SHORT ## _add_child(TYPE *root, TYPE *child)
+#define DLLT_ADD_CHILD(SHORT, TYPE, CHILD, PREV, NEXT, PARENT) \
+	void SHORT ## _add_child(TYPE *root, TYPE *child) { \
+		if (root-> CHILD == NULL) { \
+			root-> CHILD = child; \
+		} else { \
+			TYPE *last = root-> CHILD ; \
+			while (last-> NEXT) last = last-> NEXT ; \
+			last-> NEXT = child; \
+			child-> PREV = last; \
+		} \
+		child-> PARENT = root; \
+	}
+
+#define EXT_DLLT_NUM_CHILDREN(SHORT, TYPE, CHILD, PREV, NEXT) \
+	extern int SHORT ## _num_children(TYPE *root)
+#define DLLT_NUM_CHILDREN(SHORT, TYPE, CHILD, PREV, NEXT) \
+	int SHORT ## _num_children(TYPE *root) { \
+		int num = 0; \
+		if (root-> CHILD != NULL) { \
+			TYPE *last = root-> CHILD; \
+			while (last) { num++; last = last-> NEXT ; } \
+		} \
+		return num; \
+	}
+
+#define EXT_DLLT_COUNT(SHORT, TYPE, CHILD, PREV, NEXT) \
+	extern int SHORT ## _count(TYPE *root)
+#define DLLT_COUNT(SHORT, TYPE, CHILD, PREV, NEXT) \
+	int SHORT ## _count(TYPE *root) { \
+		int num = 1; \
+		if (root-> CHILD) num += SHORT ## _count(root-> CHILD); \
+		if (root-> NEXT)  num += SHORT ## _count(root-> NEXT); \
+		return num; \
+	}
+
+#define EXT_DLLT_GET_CHILD(SHORT, TYPE, CHILD, PREV, NEXT) \
+	extern TYPE * SHORT ## _get_child(TYPE *root, int id)
+#define DLLT_GET_CHILD(SHORT, TYPE, CHILD, PREV, NEXT) \
+	TYPE * SHORT ## _get_child(TYPE *root, int id) { \
+		int i = 0; \
+		TYPE *last = root-> CHILD; \
+		while (last != NULL) { \
+			if (i++ == id) return last; \
+			last = last-> NEXT ; \
+		} \
+		return NULL; \
+	}
+
+#define EXT_DLLT_REMOVE_CHILD(SHORT, TYPE, CHILD, PREV, NEXT, PARENT) \
+	extern void SHORT ## _remove_child(TYPE *root, TYPE *child)
+#define DLLT_REMOVE_CHILD(SHORT, TYPE, CHILD, PREV, NEXT, PARENT) \
+	void SHORT ## _remove_child(TYPE *root, TYPE *child) { \
+		if (root-> CHILD == NULL) { \
+			return;	\
+		} else if (root-> CHILD == child) { \
+			root-> CHILD = child-> NEXT; \
+			child-> PREV = NULL; \
+		} else { \
+			TYPE *last = root-> CHILD; \
+			while (last-> NEXT) { \
+				if (last-> NEXT == child) { \
+					last-> NEXT = child-> NEXT; \
+					if (child-> NEXT) { \
+						child-> NEXT -> PREV = last; \
+					} \
+					break; \
+				} \
+				last = last-> NEXT ; \
+			} \
+		} \
+		child-> PREV = NULL; \
+		child-> NEXT = NULL; \
+		child-> PARENT = NULL; \
+	}
+
+#define EXT_DLLT_PACKAGE(SHORT, TYPE, CHILD, PREV, NEXT, PARENT) \
+	EXT_DLLT_ADD_CHILD(SHORT, TYPE, CHILD, PREV, NEXT, PARENT); \
+	EXT_DLLT_REMOVE_CHILD(SHORT, TYPE, CHILD, PREV, NEXT, PARENT); \
+	EXT_DLLT_NUM_CHILDREN(SHORT, TYPE, CHILD, PREV, NEXT); \
+	EXT_DLLT_GET_CHILD(SHORT, TYPE, CHILD, PREV, NEXT)
+
+#define DLLT_PACKAGE(SHORT, TYPE, CHILD, PREV, NEXT, PARENT) \
+	DLLT_ADD_CHILD(SHORT, TYPE, CHILD, PREV, NEXT, PARENT) \
+	DLLT_REMOVE_CHILD(SHORT, TYPE, CHILD, PREV, NEXT, PARENT) \
+	DLLT_NUM_CHILDREN(SHORT, TYPE, CHILD, PREV, NEXT) \
+	DLLT_GET_CHILD(SHORT, TYPE, CHILD, PREV, NEXT) \
+	DLLT_COUNT(SHORT, TYPE, CHILD, PREV, NEXT)
+
 #endif
